@@ -3,8 +3,8 @@
 /** @license
  *
  * jsPDF - PDF Document creation from JavaScript
- * Version 2.1.1 Built on 2019-10-11T08:56:25.346Z
- *                      CommitID 0dd01f177e
+ * Version 1.5.3 Built on 2020-06-19T10:02:09.673Z
+ *                      CommitID 2c5e6c7cb0
  *
  * Copyright (c) 2010-2018 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
  *               2015-2018 yWorks GmbH, http://www.yworks.com
@@ -34,6 +34,8 @@
  */
 
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
       return typeof obj;
@@ -939,6 +941,10 @@ var jsPDF = function (global) {
      */
 
     var Matrix = function Matrix(sx, shy, shx, sy, tx, ty) {
+      if (!(this instanceof Matrix)) {
+        return new Matrix(sx, shy, shx, sy, tx, ty);
+      }
+
       var _matrix = [];
       /**
        * @name sx
@@ -1346,8 +1352,13 @@ var jsPDF = function (global) {
      */
 
 
-    API.ShadingPattern = function (type, coords, colors, gState, matrix) {
-      advancedApiModeTrap("ShadingPattern"); // see putPattern() for information how they are realized
+    API.ShadingPattern = function ShadingPattern(type, coords, colors, gState, matrix) {
+      advancedApiModeTrap("ShadingPattern");
+
+      if (!(this instanceof ShadingPattern)) {
+        return new ShadingPattern(type, coords, colors, gState, matrix);
+      } // see putPattern() for information how they are realized
+
 
       this.type = type === "axial" ? 2 : 3;
       this.coords = coords;
@@ -1370,8 +1381,13 @@ var jsPDF = function (global) {
      */
 
 
-    API.TilingPattern = function (boundingBox, xStep, yStep, gState, matrix) {
+    API.TilingPattern = function TilingPattern(boundingBox, xStep, yStep, gState, matrix) {
       advancedApiModeTrap("TilingPattern");
+
+      if (!(this instanceof TilingPattern)) {
+        return new TilingPattern(boundingBox, xStep, yStep, gState, matrix);
+      }
+
       this.boundingBox = boundingBox;
       this.xStep = xStep;
       this.yStep = yStep;
@@ -2999,7 +3015,7 @@ var jsPDF = function (global) {
      *
      * @memberof jsPDF#
      * @name setPage
-     * @param {number} page Switch the active page to the page number specified.
+     * @param {number} page Switch the active page to the page number specified (indexed starting at 1).
      * @example
      * doc = jsPDF()
      * doc.addPage()
@@ -5019,7 +5035,10 @@ var jsPDF = function (global) {
      */
 
 
-    API.GState = function (parameters) {
+    API.GState = function GState(parameters) {
+      if (!(this instanceof GState)) {
+        return new GState(parameters);
+      }
       /**
        * @name GState#opacity
        * @type {any}
@@ -5029,6 +5048,8 @@ var jsPDF = function (global) {
        * @name GState#stroke-opacity
        * @type {any}
        */
+
+
       var supported = "opacity,stroke-opacity".split(",");
 
       for (var p in parameters) {
@@ -5454,8 +5475,7 @@ var jsPDF = function (global) {
      * @instance
      * @param  {string} filename The filename including extension.
      * @param  {Object} options An Object with additional options, possible options: 'returnPromise'.
-     * @returns {jsPDF} jsPDF-instance
-     */
+     * @returns {jsPDF} jsPDF-instance     */
 
 
     API.save = function (filename, options) {
@@ -5665,7 +5685,7 @@ var jsPDF = function (global) {
    * @memberof jsPDF#
    */
 
-  jsPDF.version = '2.1.1';
+  jsPDF.version = '1.5.3';
 
   if (typeof define === "function" && define.amd) {
     define(function () {
@@ -8513,9 +8533,6 @@ var jsPDF = function (global) {
     globalObj["AcroForm"] = {
       Appearance: AcroFormAppearance
     };
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn("AcroForm-Classes are not populated into global-namespace, because the class-Names exist already. This avoids conflicts with the already used framework.");
   }
 
   jsPDFAPI.AcroFormChoiceField = AcroFormChoiceField;
@@ -10644,7 +10661,7 @@ var jsPDF = function (global) {
      * @param {Integer} [y] top-position for top-left corner of table
      * @param {Object[]} [data] An array of objects containing key-value pairs corresponding to a row of data.
      * @param {String[]} [headers] Omit or null to auto-generate headers at a performance cost
-       * @param {Object} [config.printHeaders] True to print column headers at the top of every page
+      * @param {Object} [config.printHeaders] True to print column headers at the top of every page
      * @param {Object} [config.autoSize] True to dynamically set the column widths to match the widest cell value
      * @param {Object} [config.margins] margin values for left, top, bottom, and width
      * @param {Object} [config.fontSize] Integer fontSize to use (optional)
@@ -10808,10 +10825,16 @@ var jsPDF = function (global) {
     var padding = this.internal.__cell__.padding;
     var fontSize = this.internal.__cell__.table_font_size;
     var scaleFactor = this.internal.scaleFactor;
-    return Object.keys(model).map(function (value) {
-      return _typeof(value) === "object" ? value.text : value;
-    }).map(function (value) {
-      return this.splitTextToSize(value, columnWidths[value] - padding - padding);
+    return Object.keys(model).map(function (key) {
+      return [key, model[key]];
+    }).map(function (item) {
+      var key = item[0];
+      var value = item[1];
+      return _typeof(value) === "object" ? [key, value.text] : [key, value];
+    }).map(function (item) {
+      var key = item[0];
+      var value = item[1];
+      return this.splitTextToSize(value, columnWidths[key] - padding - padding);
     }, this).map(function (value) {
       return this.getLineHeightFactor() * value.length * fontSize / scaleFactor + padding + padding;
     }, this).reduce(function (pv, cv) {
@@ -13347,7 +13370,8 @@ var jsPDF = function (global) {
       x: 0,
       y: 0,
       html2canvas: {},
-      jsPDF: {}
+      jsPDF: {},
+      backgroundColor: "transparent"
     }
   };
   /* ----- FROM / TO ----- */
@@ -13444,7 +13468,7 @@ var jsPDF = function (global) {
         right: 0,
         top: 0,
         margin: "auto",
-        backgroundColor: "white"
+        backgroundColor: this.opt.backgroundColor
       }; // Set the overlay to hidden (could be changed in the future to provide a print preview).
 
       var source = cloneNode(this.prop.src, this.opt.html2canvas.javascriptEnabled);
@@ -14491,13 +14515,13 @@ var jsPDF = function (global) {
    *
    Color    Allowed      Interpretation
    Type     Bit Depths
-       0       1,2,4,8,16  Each pixel is a grayscale sample.
-       2       8,16        Each pixel is an R,G,B triple.
-       3       1,2,4,8     Each pixel is a palette index;
+      0       1,2,4,8,16  Each pixel is a grayscale sample.
+      2       8,16        Each pixel is an R,G,B triple.
+      3       1,2,4,8     Each pixel is a palette index;
                          a PLTE chunk must appear.
-       4       8,16        Each pixel is a grayscale sample,
+      4       8,16        Each pixel is a grayscale sample,
                          followed by an alpha sample.
-       6       8,16        Each pixel is an R,G,B triple,
+      6       8,16        Each pixel is an R,G,B triple,
                          followed by an alpha sample.
   */
 
@@ -15342,6 +15366,8 @@ var jsPDF = function (global) {
       } else {
         if (doKerning && _typeof(kerning[char_code]) === "object" && !isNaN(parseInt(kerning[char_code][prior_char_code], 10))) {
           kerningValue = kerning[char_code][prior_char_code] / kerningFractionOf;
+        } else {
+          kerningValue = 0;
         }
 
         output.push((widths[char_code] || default_char_width) / widthsFractionOf + kerningValue);

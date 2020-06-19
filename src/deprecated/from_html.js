@@ -7,6 +7,8 @@
  *               2014 Wolfgang Gassler, https://github.com/woolfg
  *               2014 Steven Spungin, https://github.com/flamenco
  *
+ * Copyright (c) 2020 BMD Software, https://github.com/BMDSoftware
+ * 
  * @license
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -186,8 +188,12 @@
         prop = prop.replace(/-\D/g, function(match) {
           return match.charAt(1).toUpperCase();
         });
-        return compCSS[prop];
-      };
+        var val = compCSS[prop];
+        if (val.startsWith('"') && val.endsWith('"')) {
+          val = val.slice(1, val.length - 1);
+        }
+        return val;
+    };
     })(element);
     css = {};
     tmp = void 0;
@@ -980,13 +986,22 @@
       this.pdf.internal.write(style["word-spacing"].toFixed(2), "Tw");
     }
 
+    // pdfEscape is enough for text document properties,
+    // but not for Unicode text that we want to render.
+    // So if the font is Identity-H, we use `pdfEscape16` to convert the text
+    // to hexadecimal glyph codes.
+    var pdfStream;
+    if (font.encoding === 'Identity-H') {
+      pdfStream = "<" + this.pdf.pdfEscape16(text, font) + "> Tj";
+    } else {
+      pdfStream = "(" + this.pdf.internal.pdfEscape(text) + ") Tj";
+    }
     this.pdf.internal.write(
       "/" + font.id,
       (defaultFontSize * style["font-size"]).toFixed(2),
       "Tf",
-      "(" + this.pdf.internal.pdfEscape(text) + ") Tj"
-    );
-
+      pdfStream);
+    
     //set the word spacing back to neutral => 0
     if (style["word-spacing"] !== undefined) {
       this.pdf.internal.write(0, "Tw");
@@ -1136,11 +1151,9 @@
           indentMove = wantedIndent - currentIndent;
           currentIndent = wantedIndent;
         }
-        var indentMore =
-          Math.max(blockstyle["margin-left"] || 0, 0) * fontToUnitRatio;
         //move the cursor
         out(
-          indentMove + indentMore,
+          indentMove,
           (-1 * defaultFontSize * maxLineHeight).toFixed(2),
           "Td"
         );
