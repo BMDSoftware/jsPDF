@@ -2071,22 +2071,14 @@ import { console } from "../libs/console.js";
           this.lineWidth = oldLineWidth * options.scale;
         }
 
-        if (tmpRect.y <= pageHeightMinusMargin) {
-          if (tmpRect.y - tmpRect.h >= 0 && tmpRect.x <= pageWidthMinusMargin) {
-            var croppedText = this.pdf.splitTextToSize(options.text, options.maxWidth || pageWidthMinusMargin - tmpRect.x)[0];
-            this.pdf.text(croppedText, tmpRect.x, tmpRect.y, {
+        if ((this.margin[0] <= tmpRect.y) && (tmpRect.y <= (this.pdf.internal.pageSize.height - this.margin[2]))) {
+          var croppedText = this.pdf.splitTextToSize(options.text, options.maxWidth || pageWidthMinusMargin - tmpRect.x)[0];
+          this.pdf.text(croppedText, tmpRect.x, tmpRect.y, {
               angle: options.angle,
               align: textAlign,
               renderingMode: options.renderingMode,
               renderMaxWidthOverflow: false
-            });
-          }
-        } else {
-          // This text is the last element of the page, but it got cut off due to the margin
-          // so we render it in the next page
-
-          // As a result, all other elements have their y offset increased
-          this.ctx.prevPageLastElemOffset += pageHeightMinusMargin - tmpRect.y + tmpRect.h;
+          });
         }
 
         if (options.scale >= 0.01) {
