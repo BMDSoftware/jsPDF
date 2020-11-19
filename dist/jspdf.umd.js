@@ -1,7 +1,7 @@
 /** @license
  *
  * jsPDF - PDF Document creation from JavaScript
- * Version 2.1.1-bmd Built on 2020-11-19T10:50:29.546Z
+ * Version 2.1.1-bmd Built on 2020-11-19T15:34:06.901Z
  *                      CommitID 00000000
  *
  * Copyright (c) 2010-2020 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
@@ -14189,7 +14189,7 @@
           this.lineWidth = lineWidth;
           this.lineJoin = lineJoin;
 
-          var topMargin = (k === min ? this.posY + this.margin[0] : this.margin[0]);
+          var topMargin = (k === 1 ? this.posY + this.margin[0] : this.margin[0]);
           var firstPageHeight = this.pdf.internal.pageSize.height - this.posY - this.margin[0] - this.margin[2];
           var pageHeightMinusMargin = this.pdf.internal.pageSize.height - this.margin[0] - this.margin[2];
           var previousPageHeightSum = k === 1 ? 0 : firstPageHeight + (k - 2) * pageHeightMinusMargin;
